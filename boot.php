@@ -1,93 +1,76 @@
 <?php
 
-namespace Bauthor\Blaupause;
+namespace Alexplusde\Urlaub;
 
 use rex;
 use rex_addon;
-use rex_config;
-use rex_cronjob_manager;
-use rex_csrf_token;
+use rex_response;
 use rex_extension;
 use rex_extension_point;
-use rex_url;
-use rex_view;
-use rex_yform_manager_dataset;
-use rex_yform_manager_table;
 
-// Die boot.php wird bei jedem Seitenaufruf im Frontend und Backend aufgeführt, je nach Reihenfolge von Abhängigkeiten in der package.yml vor oder nach anderen Addons.
-
-// Beispiel YOrm Model-Klasse registrieren, wenn das Addon mit einer eigenen YForm Tabelle kommt.
-/*
-if (rex_addon::get('yform')->isAvailable() && !rex::isSafeMode()) {
-    rex_yform_manager_dataset::setModelClass(
-        'rex_blaupause',
-        Blaupause::class
-    );
+/* Beispiel-Code aus Slack */
+if (rex_addon::get('yrewrite')->isAvailable() && !rex::isSafeMode()) {
+    rex_extension::register('PACKAGES_INCLUDED', function () {
+        $urlPath = trim($_SERVER['REQUEST_URI'], '/');
+        $segments = explode('/', $urlPath);
+        // Prüfen, ob die URL mit "aaabbb" beginnt und eine ID enthält
+        if ($segments[0] === 'aaabbb' && isset($segments[1])) {
+            $id = explode('?', $segments[1])[0]; // Falls Query-Parameter dran hängen, diese entfernen
+            $unterkunftArticleId = 12854;
+            $_REQUEST['object_id'] = $id; // Optional für rex_request()
+            $structureAddon = rex_addon::get('structure');
+            $structureAddon->setProperty('article_id', $unterkunftArticleId);
+        } else {
+            rex_response::send404();
+        }
+    });
 }
-*/
 
-/* Nutzt du T-Racks? <https://github.com/alexplusde/tracks> Module und Addons bei der Entwicklung synchroinsieren */
-/*
-if (rex::isBackend() && rex::isDebugMode() && rex_config::get('blaupause', 'dev')) {
-    \Tracks\🦖::writeModule('blaupause', 'blaupause.%');
-    \Tracks\🦖::writeTemplate('blaupause', 'blaupause.%');
-}
-*/
 
-// Prüfen, ob ein anderes Addon installiert ist, bspw. Cronjob-Addon
-/*
-if (rex_addon::get('cronjob')->isAvailable() && !rex::isSafeMode()) {
-    rex_cronjob_manager::registerType(Cronjob\Blaupause::class);
-}
-*/
+/* Modifizierter Code aus URL-Addon: */
+// https://github.com/tbaddade/redaxo_url/blob/560d1ed03e4c0bc37c247cff86735a92bfad6e07/boot.php#L82-L92
+rex_extension::register('PACKAGES_INCLUDED', function (\rex_extension_point $epPackagesIncluded) {
 
-// API-Route registrieren, wenn das Addon mit einer eigenen API kommt.
-/*
-if (rex_plugin::get('yform', 'rest')->isAvailable() && !rex::isSafeMode()) {
-    Api\Restful::init();
-}
-*/
+    $blocked_article_ids = Urlaub::getAllArticleIds();
 
-// Beim Extension Point REX_YFORM_SAVED etwas ausführen
-/*
-rex_extension::register('REX_YFORM_SAVED', function (rex_extension_point $ep) {
-    // Mein Code, oder meine Funktion / statische Methode aufrufen
-});
-*/
+    // Artikel löschen deaktivieren, wenn Artikel in der Liste der blockierten Artikel ist
+    rex_extension::register('OUTPUT_FILTER', function (\rex_extension_point $ep) use ($blocked_article_ids) {
+        $subject = $ep->getSubject();
 
-// CSS und JS im Backend laden, wenn eingeloggt.
-/*
-if (rex::isBackend() && rex::getUser()) {
-    rex_view::addCssFile($this->getAssetsUrl('backend.css'));
-    rex_view::addJsFile($this->getAssetsUrl('backend.js'));
-}
-*/
+        foreach ($blocked_article_ids as $id) {
+            $regexp = '@<a.*?href="index\.php\?page=structure[^>]*category-id=' . $id . '&[^>]*rex-api-call=category_delete[^>]*>([^&]*)<\/a>@';
+            if (preg_match($regexp, $subject, $matches)) {
+                $subject = str_replace($matches[0], '<span class="text-muted" title="' . rex_i18n::msg('url_generator_structure_disallow_to_delete_category') . '">' . $matches[1] . '</span>', $subject);
+            }
+            $regexp = '@<a[^>]*href="index\.php\?page=structure[^>]*article_id=' . $id . '&[^>]*rex-api-call=article_delete[^>]*>([^&]*)<\/a>@';
+            if (preg_match($regexp, $subject, $matches)) {
+                $subject = str_replace($matches[0], '<span class="text-muted" title="' . rex_i18n::msg('url_generator_structure_disallow_to_delete_article') . '">' . $matches[1] . '</span>', $subject);
+            }
+        }
+        return $subject;
+    });
 
-// YForm-Tabelle? `+`-Button im Hauptmenü hinzufügen
-/*
+    /*
+        // Profilartikel - löschen nicht erlauben
+        $rexApiCall = rex_request(rex_api_function::REQ_CALL_PARAM, 'string', '');
+        if (($rexApiCall == 'category_delete' && in_array(rex_request('category-id', 'int'), $profileArticleIds)) ||
+            ($rexApiCall == 'article_delete' && in_array(rex_request('article_id', 'int'), $profileArticleIds))) {
+            $_REQUEST[rex_api_function::REQ_CALL_PARAM] = '';
+            rex_extension::register('PAGE_TITLE_SHOWN', function (\rex_extension_point $ep) {
+                $subject = $ep->getSubject();
+                $ep->setSubject(rex_view::error(rex_i18n::msg('url_generator_rex_api_delete')).$subject);
+            });
+        } */
 
-if (rex::isBackend() && \rex_addon::get('blaupause') && \rex_addon::get('blaupause')->isAvailable() && !rex::isSafeMode()) {
-    $addon = rex_addon::get('blaupause');
-    $pages = $addon->getProperty('pages');
-    // oder $page = $addon->getProperty('page');
+    rex_extension::register('URL_REWRITE', function (rex_extension_point $ep) {
+        return Urlaub::getRewriteUrl($ep);
+    }, rex_extension::EARLY);
 
-    if (rex::isBackend() && !empty($_REQUEST)) {
-        $_csrf_key = rex_yform_manager_table::get('rex_blaupause')->getCSRFKey();
-
-        $token = rex_csrf_token::factory($_csrf_key)->getUrlParams();
-
-        $params = [];
-        $params['table_name'] = 'rex_blaupause'; // Tabellenname anpassen
-        $params['rex_yform_manager_popup'] = '0';
-        $params['_csrf_token'] = $token['_csrf_token'];
-        $params['func'] = 'add';
-
-        $href = rex_url::backendPage('blaupause/entry', $params);
-
-        $pages['blaupause']['title'] .= ' <a class="label label-primary tex-primary" style="position: absolute; right: 18px; top: 10px; padding: 0.2em 0.6em 0.3em; border-radius: 3px; color: white; display: inline; width: auto;" href="' . $href . '">+</a>';
-        $addon->setProperty('pages', $pages);
-        // oder $page['title'] .= ' <a class="label label-primary tex-primary" style="position: absolute; right: 18px; top: 10px; padding: 0.2em 0.6em 0.3em; border-radius: 3px; color: white; display: inline; width: auto;" href="' . $href . '">+</a>';
-        // oder $addon->setProperty('page', $page);
+    if (null !== Urlaub::getRewriter()) {
+        rex_extension::register('YREWRITE_SITEMAP', function (rex_extension_point $ep) {
+            $sitemap = (array) $ep->getSubject();
+            $sitemap = array_merge($sitemap, Urlaub::getSitemap());
+            $ep->setSubject($sitemap);
+        }, rex_extension::EARLY);
     }
-}
-*/
+}, rex_extension::EARLY);
