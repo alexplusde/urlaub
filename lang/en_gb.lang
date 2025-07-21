@@ -1,0 +1,94 @@
+# REDAXO URL2 Addon - English Language File
+# @package redaxo\urlaub
+# @author  Alexander Walther
+# @since   2.0.0
+
+# Navigation
+urlaub_title = URL Profiles
+urlaub_profiles = Profiles
+urlaub_urls = URLs
+urlaub_settings = Settings
+
+# Profile Overview
+urlaub_profiles_title = Manage URL Profiles
+urlaub_profiles_intro = This page displays all registered URL profiles that were registered via Extension Points or directly in the database.
+urlaub_profiles_empty = No profiles found
+urlaub_profiles_name = Profile Name
+urlaub_profiles_table = Table
+urlaub_profiles_namespace = Namespace
+urlaub_profiles_url_pattern = URL Pattern
+urlaub_profiles_seo_method = SEO Method
+urlaub_profiles_status = Status
+urlaub_profiles_created = Created
+urlaub_profiles_updated = Updated
+urlaub_profiles_active = Active
+urlaub_profiles_inactive = Inactive
+
+# URLs Overview
+urlaub_urls_title = Manage Generated URLs
+urlaub_urls_intro = Overview of all generated URLs based on registered profiles.
+urlaub_urls_empty = No URLs found
+urlaub_urls_filter_profile = Filter by profile
+urlaub_urls_filter_all = All profiles
+urlaub_urls_profile = Profile
+urlaub_urls_url = URL
+urlaub_urls_data_id = Data ID
+urlaub_urls_clang_id = Language
+urlaub_urls_redirect_id = Redirect ID
+urlaub_urls_created = Created
+urlaub_urls_updated = Updated
+
+# Settings
+urlaub_settings_title = URL Settings
+urlaub_settings_form_title = Configuration
+urlaub_settings_save = Save
+urlaub_settings_saved = Settings were saved successfully
+
+# Cache Settings
+urlaub_settings_cache = Cache Settings
+urlaub_settings_cache_duration = Cache Duration (seconds)
+urlaub_settings_enable_cache = Enable Cache
+urlaub_settings_cache_info = Cache Information
+urlaub_settings_cache_status = Cache Status
+urlaub_settings_cache_enabled = Enabled
+urlaub_settings_cache_disabled = Disabled
+urlaub_settings_cache_duration_current = Current Cache Duration
+urlaub_settings_profiles_loaded = Loaded Profiles
+urlaub_settings_seconds = seconds
+urlaub_settings_clear_cache = Clear Cache
+urlaub_settings_cache_cleared = Cache was cleared successfully
+
+# SEO Settings
+urlaub_settings_seo = SEO Settings
+urlaub_settings_default_meta_keywords = Default Meta Keywords
+urlaub_settings_default_meta_description = Default Meta Description
+
+# URL Settings
+urlaub_settings_urls = URL Settings
+urlaub_settings_url_max_length = Maximum URL Length
+urlaub_settings_url_separator = URL Separator
+urlaub_settings_separator_dash = Dash (-)
+urlaub_settings_separator_underscore = Underscore (_)
+urlaub_settings_separator_dot = Dot (.)
+
+# Debug Settings
+urlaub_settings_debug = Debug Settings
+urlaub_settings_enable_debug = Enable Debug Mode
+urlaub_settings_log_level = Log Level
+urlaub_settings_log_error = Errors only
+urlaub_settings_log_warning = Warnings and errors
+urlaub_settings_log_info = Information, warnings and errors
+urlaub_settings_log_debug = All messages (Debug)
+
+# General Messages
+urlaub_error_no_data = No data found
+urlaub_error_invalid_profile = Invalid profile
+urlaub_error_database = Database error
+urlaub_success_profile_created = Profile was created successfully
+urlaub_success_profile_updated = Profile was updated successfully
+urlaub_success_profile_deleted = Profile was deleted successfully
+
+# Permissions
+perm_general_urlaub[profiles] = Manage profiles
+perm_general_urlaub[urls] = Manage URLs
+perm_general_urlaub[settings] = Manage settings

@@ -1,17 +1,29 @@
 package: urlaub
-version: '1.0.0-dev-2025-02-10'
+version: '1.0.0'
 author: 'Alexander Walther'
-supportpage: https://github.com/alexplusde/urlaub
+supportpage: 'https://github.com/alexplusde/urlaub'
+
+page:
+    title: 'translate:urlaub_title'
+    perm: urlaub[]
+    icon: rex-icon fa-link
+    subpages:
+        profiles:
+            title: 'translate:urlaub_profiles'
+            perm: urlaub[profiles]
+        urls:
+            title: 'translate:urlaub_urls'
+            perm: urlaub[urls]
+        settings:
+            title: 'translate:urlaub_settings'
+            perm: urlaub[settings]
 
 requires:
-    php:
-        version: '>8.1,<9'
-    redaxo: ^5.16
+    redaxo: '^5.19.0'
     packages:
-        yrewrite: "^4"
+        yform: '^5.0'
+        yrewrite: '^2.10'
 
-installer_ignore:
-- .git
-- .gitignore
-- .github
-- .php-cs-fixer.dist.php
+conflicts:
+    packages:
+#        url: '*'

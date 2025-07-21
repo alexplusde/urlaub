@@ -1,0 +1,42 @@
+# PHPStan Konfiguration für URL2 ("Urlaub") Addon
+parameters:
+    level: 7  # Beginnen mit Level 7, später auf 8 erhöhen
+    paths:
+        - lib
+        - boot.php
+    excludePaths:
+        - examples
+        - docs
+    ignoreErrors:
+        # REDAXO Core Ignores
+        - '#Call to an undefined method rex_sql::[a-zA-Z_]+\(\)#'
+        - '#Access to an undefined property rex_sql::\$[a-zA-Z_]+#'
+        - '#Call to static method [a-zA-Z_]+\(\) on an unknown class rex_[a-zA-Z_]+#'
+        
+        # YForm Ignores
+        - '#Call to an undefined method rex_yform_manager_[a-zA-Z_]+::[a-zA-Z_]+\(\)#'
+        - '#Access to an undefined property rex_yform_manager_[a-zA-Z_]+::\$[a-zA-Z_]+#'
+        
+        # YRewrite Ignores
+        - '#Call to static method [a-zA-Z_]+\(\) on an unknown class rex_yrewrite[a-zA-Z_]*#'
+        
+        # Extension Point Ignores
+        - '#Call to method [a-zA-Z_]+\(\) on an unknown class rex_extension_point#'
+        
+        # Bekannte REDAXO Patterns
+        - '#Parameter \#1 \$[a-zA-Z_]+ of method rex_sql::setValue\(\) expects string, mixed given#'
+        - '#Cannot call method [a-zA-Z_]+\(\) on mixed#'
+        
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+    reportUnmatchedIgnoredErrors: false
+    
+    # Zusätzliche Einstellungen für REDAXO
+    dynamicConstantNames:
+        - rex::*
+        - REX_*
+    
+    # Stub-Dateien für bessere Analyse (optional)
+    # stubFiles:
+    #     - stubs/redaxo.stub
+    #     - stubs/yform.stub

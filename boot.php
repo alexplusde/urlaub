@@ -1,76 +1,98 @@
 <?php
 
-namespace Alexplusde\Urlaub;
-
-use rex;
-use rex_addon;
-use rex_response;
+use Alexplusde\Urlaub\ProfileManager;
+use Alexplusde\Urlaub\UrlManager;
+use Alexplusde\Urlaub\Seo;
+use Alexplusde\Urlaub\Generator;
+use Alexplusde\Urlaub\ExtensionPointManager;
 use rex_extension;
 use rex_extension_point;
 
-/* Beispiel-Code aus Slack */
-if (rex_addon::get('yrewrite')->isAvailable() && !rex::isSafeMode()) {
-    rex_extension::register('PACKAGES_INCLUDED', function () {
-        $urlPath = trim($_SERVER['REQUEST_URI'], '/');
-        $segments = explode('/', $urlPath);
-        // Prüfen, ob die URL mit "aaabbb" beginnt und eine ID enthält
-        if ($segments[0] === 'aaabbb' && isset($segments[1])) {
-            $id = explode('?', $segments[1])[0]; // Falls Query-Parameter dran hängen, diese entfernen
-            $unterkunftArticleId = 12854;
-            $_REQUEST['object_id'] = $id; // Optional für rex_request()
-            $structureAddon = rex_addon::get('structure');
-            $structureAddon->setProperty('article_id', $unterkunftArticleId);
-        } else {
-            rex_response::send404();
-        }
-    });
-}
+// Profile Manager initialisieren - lädt Profile aus DB und registriert Extension Point
+ProfileManager::init();
 
-
-/* Modifizierter Code aus URL-Addon: */
-// https://github.com/tbaddade/redaxo_url/blob/560d1ed03e4c0bc37c247cff86735a92bfad6e07/boot.php#L82-L92
-rex_extension::register('PACKAGES_INCLUDED', function (\rex_extension_point $epPackagesIncluded) {
-
-    $blocked_article_ids = Urlaub::getAllArticleIds();
-
-    // Artikel löschen deaktivieren, wenn Artikel in der Liste der blockierten Artikel ist
-    rex_extension::register('OUTPUT_FILTER', function (\rex_extension_point $ep) use ($blocked_article_ids) {
-        $subject = $ep->getSubject();
-
-        foreach ($blocked_article_ids as $id) {
-            $regexp = '@<a.*?href="index\.php\?page=structure[^>]*category-id=' . $id . '&[^>]*rex-api-call=category_delete[^>]*>([^&]*)<\/a>@';
-            if (preg_match($regexp, $subject, $matches)) {
-                $subject = str_replace($matches[0], '<span class="text-muted" title="' . rex_i18n::msg('url_generator_structure_disallow_to_delete_category') . '">' . $matches[1] . '</span>', $subject);
-            }
-            $regexp = '@<a[^>]*href="index\.php\?page=structure[^>]*article_id=' . $id . '&[^>]*rex-api-call=article_delete[^>]*>([^&]*)<\/a>@';
-            if (preg_match($regexp, $subject, $matches)) {
-                $subject = str_replace($matches[0], '<span class="text-muted" title="' . rex_i18n::msg('url_generator_structure_disallow_to_delete_article') . '">' . $matches[1] . '</span>', $subject);
-            }
-        }
-        return $subject;
-    });
-
-    /*
-        // Profilartikel - löschen nicht erlauben
-        $rexApiCall = rex_request(rex_api_function::REQ_CALL_PARAM, 'string', '');
-        if (($rexApiCall == 'category_delete' && in_array(rex_request('category-id', 'int'), $profileArticleIds)) ||
-            ($rexApiCall == 'article_delete' && in_array(rex_request('article_id', 'int'), $profileArticleIds))) {
-            $_REQUEST[rex_api_function::REQ_CALL_PARAM] = '';
-            rex_extension::register('PAGE_TITLE_SHOWN', function (\rex_extension_point $ep) {
-                $subject = $ep->getSubject();
-                $ep->setSubject(rex_view::error(rex_i18n::msg('url_generator_rex_api_delete')).$subject);
-            });
-        } */
-
+// Extension Points nach dem Laden aller Pakete registrieren
+rex_extension::register('PACKAGES_INCLUDED', function (rex_extension_point $ep) {
+    
+    // URL-Auflösung für YRewrite
     rex_extension::register('URL_REWRITE', function (rex_extension_point $ep) {
-        return Urlaub::getRewriteUrl($ep);
+        return UrlManager::getRewriteUrl($ep);
     }, rex_extension::EARLY);
+    
+    // YRewrite-Vorbereitung
+    rex_extension::register('YREWRITE_PREPARE', function (rex_extension_point $ep) {
+        return Seo::handleYRewritePrepare($ep);
+    }, rex_extension::EARLY);
+    
+    // Sitemap-Integration
+    rex_extension::register('YREWRITE_SITEMAP', function (rex_extension_point $ep) {
+        $sitemap = $ep->getSubject();
+        if (is_array($sitemap)) {
+            $sitemap = array_merge($sitemap, Seo::getSitemap());
+        } else {
+            $sitemap = Seo::getSitemap();
+        }
+        $ep->setSubject($sitemap);
+        return $sitemap;
+    }, rex_extension::EARLY);
+    
+    // SEO-Tags Integration
+    rex_extension::register('YREWRITE_SEO_TAGS', function (rex_extension_point $ep) {
+        return Seo::setYRewriteTags($ep);
+    }, rex_extension::EARLY);
+    
+    // Backend: Extension Points für automatische URL-Generierung
+    if (rex::isBackend() && rex::getUser() !== null) {
+        $extensionPoints = [
+            'ART_ADDED', 'ART_DELETED', 'ART_MOVED', 'ART_STATUS', 'ART_UPDATED',
+            'CAT_ADDED', 'CAT_DELETED', 'CAT_MOVED', 'CAT_STATUS', 'CAT_UPDATED',
+            'CLANG_ADDED', 'CLANG_DELETED', 'CLANG_UPDATED',
+            'CACHE_DELETED',
+            'REX_FORM_SAVED',
+            'REX_YFORM_SAVED',
+            'YFORM_DATA_ADDED', 'YFORM_DATA_DELETED', 'YFORM_DATA_UPDATED',
+        ];
 
-    if (null !== Urlaub::getRewriter()) {
-        rex_extension::register('YREWRITE_SITEMAP', function (rex_extension_point $ep) {
-            $sitemap = (array) $ep->getSubject();
-            $sitemap = array_merge($sitemap, Urlaub::getSitemap());
-            $ep->setSubject($sitemap);
-        }, rex_extension::EARLY);
+        foreach ($extensionPoints as $extensionPoint) {
+            rex_extension::register($extensionPoint, function (rex_extension_point $ep) {
+                $manager = new ExtensionPointManager($ep);
+                
+                if ($manager->shouldDeleteUrls()) {
+                    // URLs löschen
+                    if ($ep->getName() === 'YFORM_DATA_DELETED') {
+                        UrlManager::handleYFormDelete($ep);
+                    }
+                } elseif ($manager->shouldRegenerateUrls()) {
+                    // URLs regenerieren
+                    if (in_array($ep->getName(), ['YFORM_DATA_ADDED', 'YFORM_DATA_UPDATED', 'REX_YFORM_SAVED'])) {
+                        UrlManager::handleYFormChange($ep);
+                    } else {
+                        UrlManager::handleStructureChange($ep);
+                    }
+                }
+            }, rex_extension::LATE);
+        }
     }
+    
 }, rex_extension::EARLY);
+
+// Beispiel für andere Addons: So können sie ihre Profile registrieren
+/*
+rex_extension::register('URL_PROFILES', function(rex_extension_point $ep) {
+    $profiles = $ep->getSubject();
+
+    // Beispiel: Events-Addon registriert ein Profil
+    $profiles[] = [
+        'key' => 'events',
+        'tablename' => 'events',
+        'query' => rex_yform_manager_table::get('events')->query()->where('status', 1),
+        'seo_title' => 'getValue("title")',
+        'seo_description' => 'getValue("description")',
+        'seo_image' => 'getValue("image")',
+        'addToSitemap' => true,
+        'modifyDate' => 'getValue("updatedate")'
+    ];
+
+    return $profiles;
+});
+*/

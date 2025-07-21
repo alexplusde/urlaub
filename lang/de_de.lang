@@ -1,1 +1,94 @@
-urlaub_title = Urlaub
+# REDAXO URL2 Addon - Deutsche Sprachdatei
+# @package redaxo\urlaub
+# @author  Alexander Walther
+# @since   2.0.0
+
+# Navigation
+urlaub_title = URL-Profile
+urlaub_profiles = Profile
+urlaub_urls = URLs  
+urlaub_settings = Einstellungen
+
+# Profile Overview
+urlaub_profiles_title = URL-Profile verwalten
+urlaub_profiles_intro = Hier werden alle registrierten URL-Profile angezeigt, die über Extension Points oder direkt in der Datenbank registriert wurden.
+urlaub_profiles_empty = Keine Profile gefunden
+urlaub_profiles_name = Profilname
+urlaub_profiles_table = Tabelle
+urlaub_profiles_namespace = Namespace
+urlaub_profiles_url_pattern = URL-Muster
+urlaub_profiles_seo_method = SEO-Methode
+urlaub_profiles_status = Status
+urlaub_profiles_created = Erstellt
+urlaub_profiles_updated = Aktualisiert
+urlaub_profiles_active = Aktiv
+urlaub_profiles_inactive = Inaktiv
+
+# URLs Overview
+urlaub_urls_title = Generierte URLs verwalten
+urlaub_urls_intro = Übersicht aller generierten URLs basierend auf den registrierten Profilen.
+urlaub_urls_empty = Keine URLs gefunden
+urlaub_urls_filter_profile = Nach Profil filtern
+urlaub_urls_filter_all = Alle Profile
+urlaub_urls_profile = Profil
+urlaub_urls_url = URL
+urlaub_urls_data_id = Datensatz-ID
+urlaub_urls_clang_id = Sprache
+urlaub_urls_redirect_id = Redirect-ID
+urlaub_urls_created = Erstellt
+urlaub_urls_updated = Aktualisiert
+
+# Settings
+urlaub_settings_title = URL-Einstellungen
+urlaub_settings_form_title = Konfiguration
+urlaub_settings_save = Speichern
+urlaub_settings_saved = Einstellungen wurden erfolgreich gespeichert
+
+# Cache Settings
+urlaub_settings_cache = Cache-Einstellungen
+urlaub_settings_cache_duration = Cache-Dauer (Sekunden)
+urlaub_settings_enable_cache = Cache aktivieren
+urlaub_settings_cache_info = Cache-Informationen
+urlaub_settings_cache_status = Cache-Status
+urlaub_settings_cache_enabled = Aktiviert
+urlaub_settings_cache_disabled = Deaktiviert
+urlaub_settings_cache_duration_current = Aktuelle Cache-Dauer
+urlaub_settings_profiles_loaded = Geladene Profile
+urlaub_settings_seconds = Sekunden
+urlaub_settings_clear_cache = Cache leeren
+urlaub_settings_cache_cleared = Cache wurde erfolgreich geleert
+
+# SEO Settings
+urlaub_settings_seo = SEO-Einstellungen
+urlaub_settings_default_meta_keywords = Standard Meta-Keywords
+urlaub_settings_default_meta_description = Standard Meta-Description
+
+# URL Settings
+urlaub_settings_urls = URL-Einstellungen
+urlaub_settings_url_max_length = Maximale URL-Länge
+urlaub_settings_url_separator = URL-Trennzeichen
+urlaub_settings_separator_dash = Bindestrich (-)
+urlaub_settings_separator_underscore = Unterstrich (_)
+urlaub_settings_separator_dot = Punkt (.)
+
+# Debug Settings
+urlaub_settings_debug = Debug-Einstellungen
+urlaub_settings_enable_debug = Debug-Modus aktivieren
+urlaub_settings_log_level = Log-Level
+urlaub_settings_log_error = Nur Fehler
+urlaub_settings_log_warning = Warnungen und Fehler
+urlaub_settings_log_info = Informationen, Warnungen und Fehler
+urlaub_settings_log_debug = Alle Meldungen (Debug)
+
+# General Messages
+urlaub_error_no_data = Keine Daten gefunden
+urlaub_error_invalid_profile = Ungültiges Profil
+urlaub_error_database = Datenbankfehler
+urlaub_success_profile_created = Profil wurde erfolgreich erstellt
+urlaub_success_profile_updated = Profil wurde erfolgreich aktualisiert
+urlaub_success_profile_deleted = Profil wurde erfolgreich gelöscht
+
+# Permissions
+perm_general_urlaub[profiles] = Profile verwalten
+perm_general_urlaub[urls] = URLs verwalten
+perm_general_urlaub[settings] = Einstellungen verwalten
