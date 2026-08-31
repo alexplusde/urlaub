@@ -225,3 +225,12 @@ rex_extension::register('YFORM_SAVED', function(rex_extension_point $ep) {
     }
 });
 ```
+
+## Branch-Workflow
+
+- `main` ist geschützt. Direkte Pushes sind nicht möglich, Änderungen laufen ausschließlich
+  über Pull Requests.
+- Für jede Änderung einen Feature-Branch von `main` anlegen, zum Beispiel
+  `feature/neue-option`.
+- Der Feature-Branch wird per Pull Request nach `main` gemerged.
+- Der Check `code-style` muss grün sein, bevor gemerged werden kann.
